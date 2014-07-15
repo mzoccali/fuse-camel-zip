@@ -8,8 +8,35 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 	
+<import resource="classpath:broker.xml"/>
+<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
+   <property name="brokerURL" value="tcp://localhost:61616" />
+</bean>
+
+<!-- <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop"> -->
+<!--    <property name="maxConnections" value="8" /> -->
+<!--    <property name="connectionFactory" ref="jmsConnectionFactory" /> -->
+<!-- </bean> -->
+ 
+<bean id="jmsConfig"  class="org.apache.camel.component.jms.JmsConfiguration">
+   <property name="connectionFactory" ref="jmsConnectionFactory"/>
+   <property name="concurrentConsumers" value="5"/>
+</bean>
+
+<bean id="myactivemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+    <property name="configuration" ref="jmsConfig"/>
+    <property name="usePooledConnection" value="true"></property>
+</bean>
+
+
 	<camelContext xmlns="http://camel.apache.org/schema/spring">
     <camel:contextScan/>
+    
+    
+<!-- Camel JMSProducer to be able to send messages to a remote Active MQ server -->
+
+    
+    
     <camel:endpoint uri="file:src/data/Input?noop=true" id="inFiles"/>
     <camel:endpoint uri="file:src/data/Unzip?noop=true" id="inUnZipFiles"/>
     <camel:route>
@@ -28,8 +55,10 @@
         		<camel:log message="FILE NON ELABORATO : ${file:name}"/>
         	</camel:otherwise>
         </camel:choice>
-            
     </camel:route>
+    
+    
+    
      <camel:route>
         <camel:from ref="inUnZipFiles"/>
         <camel:choice>
@@ -37,8 +66,10 @@
         		<camel:simple>${header.CamelFileName} regex '^.*XML$'</camel:simple>
         		<camel:doTry>
 			        <camel:to uri="validator:xsd/save-fatture.xsd"/>
-			        <camel:process ref="myProcessor2"/>
+			        <!-- <camel:process ref="myProcessor2"/>-->
 			        <!-- <to uri="jms:xmlValid"/> -->
+			        <camel:to uri="myactivemq:queue:elaboraxml"/>
+			        <camel:log message="MESSAGGIO INOLTRATO ALLA CODA"/>
 			        <camel:doCatch>
 			            <camel:exception>org.apache.camel.ValidationException</camel:exception>
 			            <camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}"/>
@@ -53,13 +84,16 @@
         		<camel:log message="FILE CONTENUTO NELLO ZIP NON ELABORATO: ${file:name}"/>
         	</camel:otherwise>
         </camel:choice>
-            
+    
     </camel:route>
-    
-    
-	</camelContext>
- 
-
+             
+       <camel:route>
+        <camel:from uri="myactivemq:queue:elaboraxml"/>
+        <camel:process ref="myProcessor2"/>
+      </camel:route>
+	
+  
+</camelContext>
  
 	<bean id="zipFileDataFormat" class="org.apache.camel.dataformat.zipfile.ZipFileDataFormat">
 		<property name="usingIterator" value="true" />
