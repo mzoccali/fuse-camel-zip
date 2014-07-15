@@ -29,7 +29,7 @@
 </bean>
 
 
-	<camelContext xmlns="http://camel.apache.org/schema/spring">
+	<camelContext xmlns="http://camel.apache.org/schema/spring" trace="true">
     <camel:contextScan/>
     
     
@@ -39,7 +39,7 @@
     
     <camel:endpoint uri="file:src/data/Input?noop=true" id="inFiles"/>
     <camel:endpoint uri="file:src/data/Unzip?noop=true" id="inUnZipFiles"/>
-    <camel:route trace="true">
+    <camel:route>
         <camel:from ref="inFiles"/>
         <camel:choice>
         	<camel:when>
@@ -47,7 +47,7 @@
         		<camel:unmarshal ref="zipFileDataFormat"/>
         		 <camel:split streaming="true">
 		            <camel:simple>${body}</camel:simple>
-		            <camel:to ref="inUnZipFiles" />
+		            <camel:to uri="file:src/data/Unzip?noop=true&amp;fileName=${header.CamelFileRelativePath}/${header.CamelFileName}" id="singleFile"/>
 		        </camel:split>
 		        <camel:process ref="myProcessor1"/>
         	</camel:when>
@@ -59,33 +59,33 @@
     
     
     
-     <camel:route>
-        <camel:from ref="inUnZipFiles"/>
-        <camel:choice>
-        	<camel:when>
-        		<camel:simple>${header.CamelFileName} regex '^.*XML$'</camel:simple>
-        		<camel:doTry>
-			        <camel:to uri="validator:xsd/save-fatture.xsd"/>
-			        <!-- <camel:process ref="myProcessor2"/>-->
-			        <!-- <to uri="jms:xmlValid"/> -->
-			        <camel:to uri="myactivemq:queue:elaboraxml"/>
-			        <camel:log message="MESSAGGIO INOLTRATO ALLA CODA"/>
-			        <camel:doCatch>
-			            <camel:exception>org.apache.camel.ValidationException</camel:exception>
-			            <camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}"/>
-			            <camel:process ref="myProcessor3"/>
-			        </camel:doCatch>
-			        <camel:doFinally>
-			            <camel:log message="FINALLY"/>
-			        </camel:doFinally>
-			    </camel:doTry>
-        	</camel:when>
-        	<camel:otherwise>
-        		<camel:log message="FILE CONTENUTO NELLO ZIP NON ELABORATO: ${file:name}"/>
-        	</camel:otherwise>
-        </camel:choice>
+<!--      <camel:route> -->
+<!--         <camel:from ref="inUnZipFiles"/> -->
+<!--         <camel:choice> -->
+<!--         	<camel:when> -->
+<!--         		<camel:simple>${header.CamelFileName} regex '^.*XML$'</camel:simple> -->
+<!--         		<camel:doTry> -->
+<!-- 			        <camel:to uri="validator:xsd/save-fatture.xsd"/> -->
+<!-- 			        <camel:process ref="myProcessor2"/> -->
+<!-- 			        <to uri="jms:xmlValid"/> -->
+<!-- 			        <camel:to uri="myactivemq:queue:elaboraxml"/> -->
+<!-- 			        <camel:log message="MESSAGGIO INOLTRATO ALLA CODA"/> -->
+<!-- 			        <camel:doCatch> -->
+<!-- 			            <camel:exception>org.apache.camel.ValidationException</camel:exception> -->
+<!-- 			            <camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}"/> -->
+<!-- 			            <camel:process ref="myProcessor3"/> -->
+<!-- 			        </camel:doCatch> -->
+<!-- 			        <camel:doFinally> -->
+<!-- 			            <camel:log message="FINALLY"/> -->
+<!-- 			        </camel:doFinally> -->
+<!-- 			    </camel:doTry> -->
+<!--         	</camel:when> -->
+<!--         	<camel:otherwise> -->
+<!--         		<camel:log message="FILE CONTENUTO NELLO ZIP NON ELABORATO: ${file:name}"/> -->
+<!--         	</camel:otherwise> -->
+<!--         </camel:choice> -->
     
-    </camel:route>
+<!--     </camel:route> -->
              
        <camel:route>
         <camel:from uri="myactivemq:queue:elaboraxml"/>
