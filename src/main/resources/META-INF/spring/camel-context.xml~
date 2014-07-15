@@ -39,7 +39,7 @@
     
     <camel:endpoint uri="file:src/data/Input?noop=true" id="inFiles"/>
     <camel:endpoint uri="file:src/data/Unzip?noop=true" id="inUnZipFiles"/>
-    <camel:route trace="true">
+    <camel:route>
         <camel:from ref="inFiles"/>
         <camel:choice>
         	<camel:when>
