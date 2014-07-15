@@ -15,17 +15,16 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.xml.sax.helpers.DefaultHandler;
 
 import com.mycompany.camel.entity.ZipContent;
-import com.mycompany.camel.xml.savefatture.DOCUMENTI;
-import com.mycompany.camel.xml.savefatture.DOCUMENTO;
-import com.mycompany.camel.xml.savefatture.ROOT;
-import com.mycompany.camel.xml.savefatture.TESTATA;
-import com.mycompany.camel.xml.savefattureesito.DOCUMENTIESITO;
-import com.mycompany.camel.xml.savefattureesito.DOCUMENTOESITO;
-import com.mycompany.camel.xml.savefattureesito.ROOTESITO;
-import com.mycompany.camel.xml.savefattureesito.TESTATAESITO;
+import com.mycompany.camel.xmlsave.DOCUMENTI;
+import com.mycompany.camel.xmlsave.DOCUMENTO;
+import com.mycompany.camel.xmlsave.ROOT;
+import com.mycompany.camel.xmlsave.TESTATA;
+import com.mycompany.camel.xmlsaveesito.DOCUMENTIESITO;
+import com.mycompany.camel.xmlsaveesito.DOCUMENTOESITO;
+import com.mycompany.camel.xmlsaveesito.ROOTESITO;
+import com.mycompany.camel.xmlsaveesito.TESTATAESITO;
 
 
 public class MyProcessorSave implements Processor {
