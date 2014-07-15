@@ -50,7 +50,7 @@
 			    </camel:doTry>
         	</camel:when>
         	<camel:otherwise>
-        		<camel:log message="FILE NON ELABORATO 2 : ${file:name}"/>
+        		<camel:log message="FILE CONTENUTO NELLO ZIP NON ELABORATO: ${file:name}"/>
         	</camel:otherwise>
         </camel:choice>
             
