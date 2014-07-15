@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configures the Camel Context-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+	
+	<camelContext xmlns="http://camel.apache.org/schema/spring">
+    <camel:contextScan/>
+    <camel:endpoint uri="file:src/data/Input?noop=true" id="inFiles"/>
+    <camel:endpoint uri="file:src/data/Unzip?noop=true" id="inUnZipFiles"/>
+    <camel:route>
+        <camel:from ref="inFiles"/>
+        <camel:choice>
+        	<camel:when>
+        		<camel:simple>${header.CamelFileName} regex '^.*zip$'</camel:simple>
+        		<camel:unmarshal ref="zipFileDataFormat"/>
+        		 <camel:split streaming="true">
+		            <camel:simple>${body}</camel:simple>
+		            <camel:to ref="inUnZipFiles" />
+		        </camel:split>
+		        <camel:process ref="myProcessor1"/>
+        	</camel:when>
+        	<camel:otherwise>
+        		<camel:log message="FILE NON ELABORATO : ${file:name}"/>
+        	</camel:otherwise>
+        </camel:choice>
+            
+    </camel:route>
+     <camel:route>
+        <camel:from ref="inUnZipFiles"/>
+        <camel:choice>
+        	<camel:when>
+        		<camel:simple>${header.CamelFileName} regex '^.*XML$'</camel:simple>
+        		<camel:doTry>
+			        <camel:to uri="validator:xsd/save-fatture.xsd"/>
+			        <camel:process ref="myProcessor2"/>
+			        <!-- <to uri="jms:xmlValid"/> -->
+			        <camel:doCatch>
+			            <camel:exception>org.apache.camel.ValidationException</camel:exception>
+			            <camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}"/>
+			            <camel:process ref="myProcessor3"/>
+			        </camel:doCatch>
+			        <camel:doFinally>
+			            <camel:log message="FINALLY"/>
+			        </camel:doFinally>
+			    </camel:doTry>
+        	</camel:when>
+        	<camel:otherwise>
+        		<camel:log message="FILE NON ELABORATO 2 : ${file:name}"/>
+        	</camel:otherwise>
+        </camel:choice>
+            
+    </camel:route>
+    
+    
+	</camelContext>
+ 
+
+ 
+	<bean id="zipFileDataFormat" class="org.apache.camel.dataformat.zipfile.ZipFileDataFormat">
+		<property name="usingIterator" value="true" />
+	</bean>
+ 
+	
+	 
+	<bean id="myProcessor1" class="com.mycompany.camel.spring.MyProcessorStep1"/>
+	<bean id="myProcessor2" class="com.mycompany.camel.spring.MyProcessorStep2"/>
+	<bean id="myProcessor3" class="com.mycompany.camel.spring.MyProcessorStep3"/>
+
+
+</beans>

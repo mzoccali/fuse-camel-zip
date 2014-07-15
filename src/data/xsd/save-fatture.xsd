@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wmh="http://www.wmhelp.com/2003/eGenerator" elementFormDefault="qualified">
+  <xs:element name="ROOT">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="TESTATA" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="DOCUMENTI"  minOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="TESTATA">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="SOCIETA" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="TIPO_CONS" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__SERIE_S" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="LOT_ID" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="TOT_DOCS" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SOCIETA" type="xs:string"/>
+  <xs:element name="TIPO_CONS" type="xs:string"/>
+  <xs:element name="__SERIE_S" type="xs:string"/>
+  <xs:element name="LOT_ID" type="xs:string"/>
+  <xs:element name="TOT_DOCS" type="xs:string"/>
+  <xs:element name="DOCUMENTI">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DOCUMENTO" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DOCUMENTO">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="__DATA_DOCUMENTO_DT" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="DATA_REGISTRAZIONE" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__DATA_INIZIO_NUMERAZIONE_DT" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__ANNO_FISCALE_I" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__SERIE_S"/>
+        <xs:element ref="__NUMERO_DOCUMENTO_L" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__CODICE_FISCALE_S" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__PARTITA_IVA_S" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="CODICE_CLIENTE" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__DENOMINAZIONE_S" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="TOTALE_IMPORTO_D"/>
+        <xs:element ref="NUMERO_DOC_RIF" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="FILE_ID" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="LOT_ID" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="DOC_HASH" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="FILE_NAME" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="__DATA_DOCUMENTO_DT" type="xs:string"/>
+  <xs:element name="DATA_REGISTRAZIONE" type="xs:string"/>
+  <xs:element name="__DATA_INIZIO_NUMERAZIONE_DT" type="xs:string"/>
+  <xs:element name="__ANNO_FISCALE_I" type="xs:string"/>
+  <xs:element name="__NUMERO_DOCUMENTO_L" type="xs:string"/>
+  <xs:element name="__CODICE_FISCALE_S" type="xs:string"/>
+  <xs:element name="__PARTITA_IVA_S" type="xs:string"/>
+  <xs:element name="CODICE_CLIENTE" type="xs:string"/>
+  <xs:element name="__DENOMINAZIONE_S" type="xs:string"/>
+  <xs:element name="TOTALE_IMPORTO_D" type="xs:string"/>
+  <xs:element name="NUMERO_DOC_RIF" type="xs:string"/>
+  <xs:element name="FILE_ID" type="xs:string"/>
+  <xs:element name="DOC_HASH" type="xs:string"/>
+  <xs:element name="FILE_NAME" type="xs:string"/>
+</xs:schema>

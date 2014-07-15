@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wmh="http://www.wmhelp.com/2003/eGenerator" elementFormDefault="qualified">
+  <xs:element name="ROOTESITO">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="TESTATAESITO" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="DOCUMENTIESITO"  minOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="TESTATAESITO">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="SOCIETA" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="TIPO_CONS" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="__SERIE_S" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="LOT_ID" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="ESITO" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="DESCRIZIONE_ESITO" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SOCIETA" type="xs:string"/>
+  <xs:element name="TIPO_CONS" type="xs:string"/>
+  <xs:element name="__SERIE_S" type="xs:string"/>
+  <xs:element name="LOT_ID" type="xs:string"/>
+  <xs:element name="ESITO" type="xs:string"/>
+  <xs:element name="DESCRIZIONE_ESITO" type="xs:string"/>
+   <xs:element name="DOCUMENTIESITO">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DOCUMENTOESITO" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="DOCUMENTOESITO">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="LOT_ID"/>
+        <xs:element ref="DESCRIZIONE_ERRORE"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DESCRIZIONE_ERRORE"  type="xs:string"/>
+</xs:schema>
