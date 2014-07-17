@@ -1,0 +1,9 @@
+diff a/src/main/resources/META-INF/spring/camel-context.xml b/src/main/resources/META-INF/spring/camel-context.xml	(rejected hunks)
+@@ -47,6 +47,7 @@
+         		<camel:unmarshal ref="zipFileDataFormat"/>
+         		 <camel:split streaming="true">
+ 		            <camel:simple>${body}</camel:simple>
++		            <camel:to uri="file:src/data/Unzip?noop=true&amp;fileName=${header.CamelFileRelativePath}/${header.CamelFileName}" id="singleFile"/>
+ 		        </camel:split>
+ 		        <camel:process ref="myProcessor1"/>
+         	</camel:when>

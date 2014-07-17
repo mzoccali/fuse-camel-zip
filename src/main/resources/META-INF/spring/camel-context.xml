@@ -1,109 +1,209 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Configures the Camel Context-->
+<!-- Configures the Camel Context -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:camel="http://camel.apache.org/schema/spring"
-       xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xsi:schemaLocation="
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
-	
-<import resource="classpath:broker.xml"/>
-<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" depends-on="broker">
-   <property name="brokerURL" value="tcp://localhost:61616" />
-</bean>
 
-<!-- <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" init-method="start" destroy-method="stop"> -->
-<!--    <property name="maxConnections" value="8" /> -->
-<!--    <property name="connectionFactory" ref="jmsConnectionFactory" /> -->
-<!-- </bean> -->
- 
-<bean id="jmsConfig"  class="org.apache.camel.component.jms.JmsConfiguration">
-   <property name="connectionFactory" ref="jmsConnectionFactory"/>
-   <property name="concurrentConsumers" value="5"/>
-</bean>
+	<import resource="classpath:broker.xml" />
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"
+		depends-on="broker">
+		<property name="brokerURL" value="tcp://localhost:61616" />
+	</bean>
 
-<bean id="myactivemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
-    <property name="configuration" ref="jmsConfig"/>
-    <property name="usePooledConnection" value="true"></property>
-</bean>
+	<!-- <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" 
+		init-method="start" destroy-method="stop"> -->
+	<!-- <property name="maxConnections" value="8" /> -->
+	<!-- <property name="connectionFactory" ref="jmsConnectionFactory" /> -->
+	<!-- </bean> -->
+
+	<bean id="jmsConfig" class="org.apache.camel.component.jms.JmsConfiguration">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="concurrentConsumers" value="5" />
+	</bean>
+
+	<bean id="myactivemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
+		<property name="configuration" ref="jmsConfig" />
+		<property name="usePooledConnection" value="true"></property>
+	</bean>
 
 
-	<camelContext xmlns="http://camel.apache.org/schema/spring" trace="true">
-    <camel:contextScan/>
-    
-    
-<!-- Camel JMSProducer to be able to send messages to a remote Active MQ server -->
+	<camelContext xmlns="http://camel.apache.org/schema/spring" trace="false">
+		<camel:contextScan />
 
-    
-    
-    <camel:endpoint uri="file:src/data/Input?noop=true" id="inFiles"/>
-    <camel:endpoint uri="file:src/data/Unzip?noop=true" id="inUnZipFiles"/>
-    <camel:route>
-        <camel:from ref="inFiles"/>
-        <camel:choice>
-        	<camel:when>
-        		<camel:simple>${header.CamelFileName} regex '^.*zip$'</camel:simple>
-        		<camel:unmarshal ref="zipFileDataFormat"/>
-        		 <camel:split streaming="true">
-		            <camel:simple>${body}</camel:simple>
-		            <camel:to uri="file:src/data/Unzip?noop=true&amp;fileName=${header.CamelFileRelativePath}/${header.CamelFileName}" id="singleFile"/>
-		        </camel:split>
-		        <camel:process ref="myProcessor1"/>
-        	</camel:when>
-        	<camel:otherwise>
-        		<camel:log message="FILE NON ELABORATO : ${file:name}"/>
-        	</camel:otherwise>
-        </camel:choice>
-    </camel:route>
-    
-    
-    
-<!--      <camel:route> -->
-<!--         <camel:from ref="inUnZipFiles"/> -->
-<!--         <camel:choice> -->
-<!--         	<camel:when> -->
-<!--         		<camel:simple>${header.CamelFileName} regex '^.*XML$'</camel:simple> -->
-<!--         		<camel:doTry> -->
-<!-- 			        <camel:to uri="validator:xsd/save-fatture.xsd"/> -->
-<!-- 			        <camel:process ref="myProcessor2"/> -->
-<!-- 			        <to uri="jms:xmlValid"/> -->
-<!-- 			        <camel:to uri="myactivemq:queue:elaboraxml"/> -->
-<!-- 			        <camel:log message="MESSAGGIO INOLTRATO ALLA CODA"/> -->
-<!-- 			        <camel:doCatch> -->
-<!-- 			            <camel:exception>org.apache.camel.ValidationException</camel:exception> -->
-<!-- 			            <camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}"/> -->
-<!-- 			            <camel:process ref="myProcessor3"/> -->
-<!-- 			        </camel:doCatch> -->
-<!-- 			        <camel:doFinally> -->
-<!-- 			            <camel:log message="FINALLY"/> -->
-<!-- 			        </camel:doFinally> -->
-<!-- 			    </camel:doTry> -->
-<!--         	</camel:when> -->
-<!--         	<camel:otherwise> -->
-<!--         		<camel:log message="FILE CONTENUTO NELLO ZIP NON ELABORATO: ${file:name}"/> -->
-<!--         	</camel:otherwise> -->
-<!--         </camel:choice> -->
-    
-<!--     </camel:route> -->
-             
-       <camel:route>
-        <camel:from uri="myactivemq:queue:elaboraxml"/>
-        <camel:process ref="myProcessor2"/>
-      </camel:route>
-	
-  
-</camelContext>
- 
+
+		<!-- Camel JMSProducer to be able to send messages to a remote Active MQ 
+			server -->
+
+
+
+		<camel:endpoint uri="file:src/data/Input?noop=true" id="inFiles" />
+<!-- 		<camel:endpoint uri="file:src/data/Unzip?noop=true" id="inUnZipFiles" /> -->
+
+<!-- ROUTE 1 : Elaborazione zip-->
+		<camel:route>
+			<camel:from ref="inFiles" />
+			<camel:choice>
+				<camel:when>
+					<camel:simple>${header.CamelFileName} regex '^.*zip$'</camel:simple>
+					<camel:unmarshal ref="zipFileDataFormat" />
+					<camel:log
+						message="FILE ZIP : ${header.CamelFileRelativePath}/${header.CamelFileName}" />
+					<bean ref="myDataExchange" method="addZip" />
+
+					<camel:split streaming="true">
+						<camel:simple>${body}</camel:simple>
+						<camel:log
+							message="FILE UNZIP : ${header.CamelFileRelativePath}/${header.CamelFileName}" />
+						<camel:to
+							uri="file:src/data/Unzip?noop=true&amp;fileName=${header.CamelFileRelativePath}/${header.CamelFileName}"
+							id="singleFile" />
+						
+					</camel:split>
+				</camel:when>
+				<camel:otherwise>
+					<camel:log message="FILE NON ELABORATO : ${file:name}" />
+				</camel:otherwise>
+			</camel:choice>
+		</camel:route>
+
+
+<!-- ROUTE 2 : Elaborazione file scompattati-->
+		<camel:route>
+			<camel:from uri="file:src/data/Unzip?noop=true&amp;recursive=true"/>
+			<camel:log message="Elaborazione file ${file:name}" />
+<!-- 			<camel:log message="Elaborazione file body ${body}" /> -->
+			<camel:choice>
+			<!-- GESTIONE XML -->
+				<camel:when>
+					<camel:simple>${header.CamelFileName} regex '^.*XML$'</camel:simple>
+					<camel:log message="MESSAGGIO XML DA VERIFICARE ${file:name}" />
+					<!-- VALIDAZIONE XML -->
+					<camel:doTry>
+						<camel:to uri="validator:xsd/save-fatture.xsd" />
+						<camel:log message="FILE XML DA AGGIUNGERE ${file:name}" />
+						<bean ref="myDataExchange" method="addFileXml" />
+						
+						<!-- VALIDAZIONE NOME FILE ZIP -->
+<!-- 						Costruisco il nome del file con i dati contenuti nell'xml -->
+						<camel:setHeader headerName="fileZipDynamicName1">
+<!-- 							<camel:xpath>//ROOT/TESTATA/TIPO_CONS/text()  //ROOT/TESTATA/TIPO_CONS/text()</camel:xpath> -->
+							<camel:xquery type="java.lang.String">
+																	concat( 
+																	concat( 
+																	concat( //ROOT/TESTATA/TIPO_CONS/text() , '_')
+																	, //ROOT/TESTATA/SOCIETA//text())
+																	,'_')
+																	</camel:xquery>
+						</camel:setHeader>
+						<camel:log message="HEADER fileZipDynamicName1 ${header.fileZipDynamicName1}" />
+						
+						<camel:choice>
+							<camel:when>
+								<camel:xpath>//ROOT/TESTATA/__SERIE_S/text()=''</camel:xpath>
+								<camel:setHeader headerName="fileZipDynamicSeries">
+									<camel:simple>xx</camel:simple>
+								</camel:setHeader>
+							</camel:when>
+							<camel:otherwise>
+								<camel:setHeader headerName="fileZipDynamicSeries">
+									<camel:xpath>//ROOT/TESTATA/__SERIE_S//text()</camel:xpath>
+								</camel:setHeader>
+							</camel:otherwise>
+						</camel:choice>
+						<camel:log message="HEADER fileZipDynamicSeries ${header.fileZipDynamicSeries}" />
+						
+						<camel:setHeader headerName="fileZipDynamicName2">
+							<camel:xquery type="java.lang.String">concat('_', //ROOT/TESTATA/LOT_ID//text())</camel:xquery>
+						</camel:setHeader>
+						<camel:log message="HEADER fileZipDynamicName2 ${header.fileZipDynamicName2}" />
+						
+						<camel:setHeader headerName="fileZipDynamicName">
+						        <camel:simple>${headers.fileZipDynamicName1}${headers.fileZipDynamicSeries}${headers.fileZipDynamicName2}</camel:simple>
+						</camel:setHeader>
+						<camel:log message="HEADER fileZipDynamicName ${header.fileZipDynamicName}" />
+						
+						
+						<camel:log message="Controllo del nome del file zip: ${header.CamelFileRelativePath} contains ${header.fileZipDynamicName}" />
+						<camel:choice>
+							<camel:when>
+<!-- 							TODO: si puo' raffinare il controllo -->
+								<camel:simple>${header.CamelFileRelativePath} contains ${header.fileZipDynamicName}</camel:simple>
+								<camel:log message="Nome del file ZIP CORRETTO" />
+							</camel:when>
+							<camel:otherwise>
+								<camel:log message="Nome del file ZIP ERRATO" />
+							</camel:otherwise>
+						</camel:choice>
+						
+						<!-- FINE VALIDAZIONE NOME FILE ZIP -->
+						
+						
+						
+						<camel:doCatch>
+							<camel:exception>org.apache.camel.ValidationException</camel:exception>
+							<camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}" />
+							<bean ref="myDataExchange" method="setEsitoKOXmlValidation" />
+						</camel:doCatch>
+						<camel:doFinally>
+							<camel:log message="FINALLY XML VALIDATION" />
+						</camel:doFinally>
+					</camel:doTry>
+				</camel:when>
+			<!-- GESTIONE PDF -->
+				<camel:when>
+					<camel:simple>${header.CamelFileName} regex '^.*pdf$'</camel:simple>
+					<camel:log message="FILE PDF DA VERIFICARE ${file:name}" />
+					<!-- VALIDAZIONE PDF -->
+					<camel:choice>
+						<camel:when>
+							<camel:simple>${body} regex '^%PDF-'</camel:simple>
+							<camel:log message="FILE PDF DA AGGIUNGERE ${file:name}" />
+							<bean ref="myDataExchange" method="addFilePdf" />
+						</camel:when>	
+						<camel:otherwise>
+							<camel:log message="VALIDAZIONE PDF FALLITA : ${file:name}" />
+							<bean ref="myDataExchange" method="setEsitoKOPdfValidation" />
+						</camel:otherwise>
+					</camel:choice>
+				</camel:when>
+				<camel:otherwise>
+					<camel:log message="NO FILE ADDED TO ZIPINFO : ${header.CamelFileName}" />
+				</camel:otherwise>
+			</camel:choice>
+			
+			
+			<!-- VALIDAZIONE NUMERO DI PDF -->
+			<bean ref="myDataExchange" method="checkNumPdf" />
+			
+
+
+			<bean ref="myDataExchange" method="writeEsito" />
+		</camel:route>
+
+
+		
+
+
+
+<!-- 		<camel:route> -->
+<!-- 			<camel:from uri="myactivemq:queue:elaboraxml" /> -->
+<!-- 			<camel:process ref="myProcessor1" /> -->
+<!-- 		</camel:route> -->
+
+
+	</camelContext>
+
 	<bean id="zipFileDataFormat" class="org.apache.camel.dataformat.zipfile.ZipFileDataFormat">
 		<property name="usingIterator" value="true" />
 	</bean>
- 
-	
-	 
-	<bean id="myProcessor1" class="com.mycompany.camel.spring.MyProcessorStep1"/>
-	<bean id="myProcessor2" class="com.mycompany.camel.spring.MyProcessorStep2"/>
-	<bean id="myProcessor3" class="com.mycompany.camel.spring.MyProcessorStep3"/>
+
+
+
+<!-- 	<bean id="myProcessor1" class="com.mycompany.camel.spring.MyProcessorStep1" /> -->
+	<bean id="myDataExchange" class="com.mycompany.camel.spring.MyDataExchange" />
 
 
 </beans>

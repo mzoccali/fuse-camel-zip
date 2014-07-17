@@ -57,6 +57,11 @@
 	  <!-- use the same version as your Camel core version -->
 	</dependency>
 	<dependency>
+  <groupId>org.apache.camel</groupId>
+  <artifactId>camel-saxon</artifactId>
+  <version>${project.camel.version}</version>
+</dependency>
+	<dependency>
 	<groupId>org.apache.activemq</groupId>
 	<artifactId>activemq-camel</artifactId>
 	<version>5.10.0</version>
@@ -71,6 +76,9 @@
    <artifactId>activemq-all</artifactId>
    <version>5.10.0</version>
 </dependency>
+
+
+
 	
   </dependencies>
   <repositories>
