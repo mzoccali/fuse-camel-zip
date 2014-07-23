@@ -28,6 +28,7 @@ public class ZipInfo {
 	private ROOT xmlContent;
 	private ROOTESITO esito;
 	private int numPdfInXml = -1;
+	private boolean fatturaAttiva = false;
 	
 
 	public ZipInfo(String zipName) {
@@ -117,6 +118,10 @@ public class ZipInfo {
 		    
 		    //setto il messaggio ad ok di default
 		    setEsitoOK();
+		    
+		    //setto il tipo di fattura
+		    System.out.println("Tipo fattura :"+ testata.getTIPOCONS());
+			setFatturaAttiva(testata.getTIPOCONS().equalsIgnoreCase(Constants.CODE_FATTURA_ATTIVA));
 			
 		} catch (JAXBException e) {
 			System.out.println("ZipZinfo.setXmlContentString ERRORE creazione OGGETTO ROOT XML:"+ e.getMessage());
@@ -134,10 +139,14 @@ public class ZipInfo {
 		setEsito(Constants.KO_MESSAGE, description);
 	}
 	
-	
+	//setta l'errore generale dell'esito e appende la descrizione generale a quelle gia' presenti
 	public void setEsito(String message, String description) {
 		esito.getTESTATAESITO().setESITO(message);
-		esito.getTESTATAESITO().setDESCRIZIONEESITO(description);
+		esito.getTESTATAESITO().setDESCRIZIONEESITO(
+				(esito.getTESTATAESITO().getDESCRIZIONEESITO()!=null
+						&& !esito.getTESTATAESITO().getDESCRIZIONEESITO().equals("")
+						)?esito.getTESTATAESITO().getDESCRIZIONEESITO()+"--":""
+				+description);
 	}
 	
 	//Scrivo l'xml di esito su file system 
@@ -178,5 +187,13 @@ public class ZipInfo {
 				+ xmlContentString + ";xmlContent=" + xmlContent + ";esito="
 				+ esito + "}";
 
+	}
+
+	public boolean isFatturaAttiva() {
+		return fatturaAttiva;
+	}
+
+	public void setFatturaAttiva(boolean fatturaAttiva) {
+		this.fatturaAttiva = fatturaAttiva;
 	}
 }

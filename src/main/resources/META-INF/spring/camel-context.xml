@@ -142,6 +142,20 @@
 						
 						
 						
+						<!-- VALIDAZIONE SEQUENZA FATTURE ATTIVE -->
+						<camel:setHeader headerName="listaSeqFattureAttive">
+							<camel:xquery type="java.lang.String"> //ROOT/DOCUMENTI/DOCUMENTO/__NUMERO_DOCUMENTO_L//text() </camel:xquery>
+						</camel:setHeader>
+						<camel:log message="HEADER listaSeqFattureAttive ${header.listaSeqFattureAttive}" />
+			
+						
+						<camel:log message="Controllo la sequenza delle fatture attive" />
+						<bean ref="myDataExchange" method="checkRange" />
+						<!-- FINE VALIDAZIONE SEQUENZA FATTURE ATTIVE -->
+						
+						
+						
+						
 						<camel:doCatch>
 							<camel:exception>org.apache.camel.ValidationException</camel:exception>
 							<camel:log message="VALIDAZIONE XSD FALLITA : ${file:name}" />
@@ -159,7 +173,9 @@
 					<!-- VALIDAZIONE PDF -->
 					<camel:choice>
 						<camel:when>
-							<camel:simple>${body} regex '^%PDF-'</camel:simple>
+
+<!--  							<camel:simple>${bodyAs(java.lang.String)} regex '^%PDF-'</camel:simple> -->
+  							<camel:simple>${bodyAs(java.lang.String)} contains '%PDF-'</camel:simple>
 							<camel:log message="FILE PDF DA AGGIUNGERE ${file:name}" />
 							<bean ref="myDataExchange" method="addFilePdf" />
 						</camel:when>	
@@ -178,9 +194,13 @@
 			<!-- VALIDAZIONE NUMERO DI PDF -->
 			<bean ref="myDataExchange" method="checkNumPdf" />
 			
+			
+			
 
-
+			<!-- SCRITTURA XML ESITO -->
 			<bean ref="myDataExchange" method="writeEsito" />
+			
+			
 		</camel:route>
 
 

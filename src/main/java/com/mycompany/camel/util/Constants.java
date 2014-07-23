@@ -14,5 +14,11 @@ public class Constants {
 	public static final String XML_EXTENTION = ".xml";
 	
 	public final static String STR_ESITI_DIR = "Esiti";
+	//TODO: verificare come gestirlo
 	public final static String STR_BASE_DIR = "src"+FOLDER_SEPARATOR+"data";
+	
+	public final static String CODE_FATTURA_ATTIVA = "FA";
+	
+	
+	
 }
